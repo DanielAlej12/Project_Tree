@@ -1,0 +1,12 @@
+id,name,last_name,gender,age,id_father,is_dead,type_magic,is_owner
+1,Alaric,Reyes,H,85,0,1,elemental,1
+2,Belin,Sol,H,40,1,0,elemental,0
+3,Celina,Nieve,M,35,1,0,unique,0
+4,Dariel,Brisa,H,50,2,0,mixed,0
+5,Elara,Luz,M,28,2,0,mixed,0
+6,Marta,Mar,M,60,3,0,no_magic,0
+7,Ginebra,Ros,M,30,3,0,mixed,0
+8,Hugo,Sol,H,25,4,0,elemental,0
+9,Ivan,Brisa,H,70,4,0,unique,0
+10,Julia,Ros,M,20,5,0,mixed,0
+11,Kai,Sol,H,55,5,0,unique,0
