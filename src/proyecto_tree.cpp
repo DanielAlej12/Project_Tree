@@ -323,3 +323,113 @@ public:
         }
         mostrarLineaSucesionSegunReglas(duenio);
     }
+
+void asignarNuevoDuenio() {
+        Mago* duenio = buscarDuenio(root);
+        if (!duenio) {
+            cout << "No hay dueno actual.\n";
+            return;
+        }
+        if (!duenio->is_dead) {
+            cout << "El dueno actual esta vivo: " << duenio->name << " " << duenio->last_name << endl;
+            return;
+        }
+
+        cout << "El dueno actual " << duenio->name << " " << duenio->last_name << " ha fallecido. Buscando nuevo dueno...\n";
+        duenio->is_owner = false;
+
+        if (duenio->left || duenio->right) {
+            Mago* n = buscarDiscipuloCondicion(duenio);
+            if (n) {
+                n->is_owner = true;
+                transferirHechizos(duenio, n);
+                cout << "Nuevo dueno es discipulo con condicion: " << n->name << " " << n->last_name << endl;
+                return;
+            }
+        }
+
+        Mago* companero = buscarCompanero(duenio);
+        if (companero) {
+            if (!companero->is_dead && compartenMagia(duenio, companero)) {
+                companero->is_owner = true;
+                transferirHechizos(duenio, companero);
+                cout << "Nuevo dueno es companero vivo y comparten magia: " << companero->name << " " << companero->last_name << endl;
+                return;
+            }
+            Mago* enArbolComp = buscarEnArbolCompanero(companero);
+            if (enArbolComp) {
+                enArbolComp->is_owner = true;
+                transferirHechizos(duenio, enArbolComp);
+                cout << "Nuevo dueno es discipulo vivo del arbol del companero: " << enArbolComp->name << " " << enArbolComp->last_name << endl;
+                return;
+            }
+        }
+
+        Mago* companeroMaestro = companeroDeMaestro(duenio);
+        if (companeroMaestro && !companeroMaestro->is_dead) {
+            companeroMaestro->is_owner = true;
+            transferirHechizos(duenio, companeroMaestro);
+            cout << "Nuevo dueno es companero del maestro: " << companeroMaestro->name << " " << companeroMaestro->last_name << endl;
+            return;
+        }
+
+        if (duenio->father && duenio->father->is_dead) {
+            Mago* nuevoDuenio = nullptr;
+            const string magias_primarias[] = {"elemental", "unique"};
+            nuevoDuenio = buscarDiscipuloConMagia(root, magias_primarias, 2);
+            if (!nuevoDuenio) {
+                const string magias_mixed[] = {"mixed"};
+                nuevoDuenio = buscarDiscipuloConMagia(root, magias_mixed, 1);
+            }
+            if (!nuevoDuenio) nuevoDuenio = buscarPrimerHombreVivo(root);
+
+            if (nuevoDuenio) {
+                nuevoDuenio->is_owner = true;
+                transferirHechizos(duenio, nuevoDuenio);
+                cout << "Por la condicion del maestro muerto, nuevo dueno: " << nuevoDuenio->name << " " << nuevoDuenio->last_name << endl;
+                return;
+            }
+        }
+
+        Mago* candidata = nullptr;
+        int edadCandidata = 1000;
+        buscarMujerJovenConDiscipulosYNecesaria(root, candidata, edadCandidata);
+        if (candidata) {
+            candidata->is_owner = true;
+            transferirHechizos(duenio, candidata);
+            cout << "Nuevo dueno mujer joven con discipulos y maestro con magia mixed: " << candidata->name << " " << candidata->last_name << endl;
+            return;
+        }
+
+        candidata = nullptr;
+        edadCandidata = 1000;
+        buscarMujerJoven(root, candidata, edadCandidata);
+        if (candidata) {
+            candidata->is_owner = true;
+            transferirHechizos(duenio, candidata);
+            cout << "Nuevo dueno mujer mas joven: " << candidata->name << " " << candidata->last_name << endl;
+            return;
+        }
+
+        if (duenio->age > 70) {
+            Mago* discipulo = buscarDiscipuloMagia(duenio, duenio->type_magic);
+            if (discipulo) {
+                discipulo->is_owner = true;
+                transferirHechizos(duenio, discipulo);
+                cout << "De acuerdo a la regla de edad > 70, nuevo dueno asignado: " << discipulo->name << " " << discipulo->last_name << endl;
+                return;
+            } else {
+                Mago* masViejo = nullptr;
+                int edadMax = -1;
+                buscarMasViejo(root, masViejo, edadMax);
+                if (masViejo) {
+                    masViejo->is_owner = true;
+                    transferirHechizos(duenio, masViejo);
+                    cout << "De acuerdo a la regla de edad > 70, nuevo dueno asignado (mas viejo): " << masViejo->name << " " << masViejo->last_name << endl;
+                    return;
+                }
+            }
+        }
+
+        cout << "No se encontro mago para asignar como nuevo dueno." << endl;
+    }
