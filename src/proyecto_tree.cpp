@@ -524,3 +524,59 @@ void mostrarHechizos(int id) {
         }
     }
 };
+
+int main() {
+    ArbolMagos arbol;
+
+    int opcion;
+    do {
+        cout << "\n--- Menu ---\n";
+        cout << "1. Mostrar linea de sucesion actual\n";
+        cout << "2. Asignar nuevo dueno\n";
+        cout << "3. Modificar datos de un mago\n";
+        cout << "4. Mostrar hechizos de un mago\n";
+        cout << "5. Cargar magos desde CSV\n";
+        cout << "6. Cargar hechizos desde CSV\n";
+        cout << "7. Salir\n";
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                arbol.mostrarLineaSucesion();
+                break;
+            case 2:
+                arbol.asignarNuevoDuenio();
+                break;
+            case 3: {
+                int id; cout << "Ingrese ID del mago a modificar: "; cin >> id;
+                arbol.modificarDatos(id);
+                break;
+            }
+            case 4: {
+                int id; cout << "Ingrese ID del mago para mostrar hechizos: "; cin >> id;
+                arbol.mostrarHechizos(id);
+                break;
+            }
+            case 5: {
+                string archivoMagos;
+                cout << "Ingrese ruta del archivo CSV de magos: "; cin >> archivoMagos;
+                arbol.cargarDesdeCSV(archivoMagos);
+                break;
+            }
+            case 6: {
+                string archivoHechizos;
+                cout << "Ingrese ruta del archivo CSV de hechizos: "; cin >> archivoHechizos;
+                arbol.cargarHechizosDesdeCSV(archivoHechizos);
+                break;
+            }
+            case 7:
+                cout << "Saliendo..." << endl;
+                break;
+            default:
+                cout << "Opcion invalida." << endl;
+        }
+    } while (opcion != 7);
+
+    return 0;
+}
