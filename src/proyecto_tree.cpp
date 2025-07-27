@@ -505,3 +505,22 @@ void modificarDatos(int id) {
 
         cout << "Datos modificados correctamente.\n";
     }
+
+void mostrarHechizos(int id) {
+        Mago* mago = buscarMago(root, id);
+        if (!mago) {
+            cout << "No se encontro mago con id " << id << endl;
+            return;
+        }
+        cout << "Hechizos de " << mago->name << " " << mago->last_name << ":\n";
+        Hechizo* actual = mago->listaHechizos;
+        if (!actual) {
+            cout << "No tiene hechizos registrados.\n";
+            return;
+        }
+        while (actual) {
+            cout << "- " << actual->nombre << "\n";
+            actual = actual->siguiente;
+        }
+    }
+};
