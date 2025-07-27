@@ -81,3 +81,143 @@ private:
         if (l) return l;
         return buscarDuenio(nodo->right);
     }
+
+    // Buscar discípulo vivo con tipo de magia específica entre un arreglo de opciones
+    Mago* buscarDiscipuloConMagia(Mago* nodo, const string magias[], int n) {
+        if (!nodo) return nullptr;
+        if (!nodo->is_dead) {
+            for (int i = 0; i < n; i++) {
+                if (nodo->type_magic == magias[i]) return nodo;
+            }
+        }
+        Mago* res = buscarDiscipuloConMagia(nodo->left, magias, n);
+        if (res) return res;
+        return buscarDiscipuloConMagia(nodo->right, magias, n);
+    }
+
+    // Buscar primer hombre vivo en subárbol
+    Mago* buscarPrimerHombreVivo(Mago* nodo) {
+        if (!nodo) return nullptr;
+        if (!nodo->is_dead && nodo->gender == 'H') return nodo;
+        Mago* res = buscarPrimerHombreVivo(nodo->left);
+        if (res) return res;
+        return buscarPrimerHombreVivo(nodo->right);
+    }
+
+    // Buscar compañero discípulo (hermano)
+    Mago* buscarCompanero(Mago* mago) {
+        if (!mago || !mago->father) return nullptr;
+        Mago* padre = mago->father;
+        if (padre->left && padre->left != mago) return padre->left;
+        if (padre->right && padre->right != mago) return padre->right;
+        return nullptr;
+    }
+
+    // Verifica si dos magos comparten la misma magia
+    bool compartenMagia(Mago* a, Mago* b) {
+        if (!a || !b) return false;
+        return a->type_magic == b->type_magic;
+    }
+
+    // Buscar discípulo vivo con la prioridad de magias según reglas
+    Mago* buscarDiscipuloCondicion(Mago* nodo) {
+        if (!nodo) return nullptr;
+        const string magiasPrimarias[] = {"elemental", "unique"};
+        Mago* res = buscarDiscipuloConMagia(nodo->left, magiasPrimarias, 2);
+        if (res) return res;
+        res = buscarDiscipuloConMagia(nodo->right, magiasPrimarias, 2);
+        if (res) return res;
+        const string magiasMixed[] = {"mixed"};
+        res = buscarDiscipuloConMagia(nodo->left, magiasMixed, 1);
+        if (res) return res;
+        res = buscarDiscipuloConMagia(nodo->right, magiasMixed, 1);
+        if (res) return res;
+        res = buscarPrimerHombreVivo(nodo->left);
+        if (res) return res;
+        return buscarPrimerHombreVivo(nodo->right);
+    }
+
+    // Buscar dentro del árbol los discípulos del compañero que cumplan la condición inicial
+    Mago* buscarEnArbolCompanero(Mago* companero) {
+        if (!companero) return nullptr;
+        Mago* nuevo = buscarDiscipuloCondicion(companero);
+        if (nuevo) return nuevo;
+        return nullptr;
+    }
+
+    // Obtener el compañero del maestro (abuelo)
+    Mago* companeroDeMaestro(Mago* mago) {
+        if (!mago || !mago->father || !mago->father->father) return nullptr;
+        Mago* maestro = mago->father;
+        Mago* abuelo = maestro->father;
+        if (abuelo->left && abuelo->left != maestro) return abuelo->left;
+        if (abuelo->right && abuelo->right != maestro) return abuelo->right;
+        return nullptr;
+    }
+
+    // Buscar mujer más joven con discípulos cuyo maestro fue dueño y tiene magia mixed
+    void buscarMujerJovenConDiscipulosYNecesaria(Mago* nodo, Mago*& candidata, int& edadCandidata) {
+        if (!nodo) return;
+        if (nodo->gender == 'M' && !nodo->is_dead && (nodo->left || nodo->right)) {
+            Mago* maestro = nodo->father;
+            if (maestro && maestro->is_owner && maestro->type_magic == "mixed") {
+                if (nodo->age < edadCandidata) {
+                    candidata = nodo;
+                    edadCandidata = nodo->age;
+                }
+            }
+        }
+        buscarMujerJovenConDiscipulosYNecesaria(nodo->left, candidata, edadCandidata);
+        buscarMujerJovenConDiscipulosYNecesaria(nodo->right, candidata, edadCandidata);
+    }
+
+    // Buscar mujer más joven viva (sin más condiciones)
+    void buscarMujerJoven(Mago* nodo, Mago*& candidata, int& edadCandidata) {
+        if (!nodo) return;
+        if (nodo->gender == 'M' && !nodo->is_dead) {
+            if (nodo->age < edadCandidata) {
+                candidata = nodo;
+                edadCandidata = nodo->age;
+            }
+        }
+        buscarMujerJoven(nodo->left, candidata, edadCandidata);
+        buscarMujerJoven(nodo->right, candidata, edadCandidata);
+    }
+
+    // Buscar discípulo con la misma magia que el mago
+    Mago* buscarDiscipuloMagia(Mago* nodo, const string& magia) {
+        if (!nodo) return nullptr;
+        if (!nodo->is_dead && nodo->type_magic == magia) return nodo;
+        Mago* res = buscarDiscipuloMagia(nodo->left, magia);
+        if (res) return res;
+        return buscarDiscipuloMagia(nodo->right, magia);
+    }
+
+    // Buscar mago vivo más viejo en el subárbol
+    void buscarMasViejo(Mago* nodo, Mago*& masViejo, int& edadMax) {
+        if (!nodo) return;
+        if (!nodo->is_dead && nodo->age > edadMax) {
+            masViejo = nodo;
+            edadMax = nodo->age;
+        }
+        buscarMasViejo(nodo->left, masViejo, edadMax);
+        buscarMasViejo(nodo->right, masViejo, edadMax);
+    }
+
+    // Transferir lista de hechizos del viejo dueño al nuevo dueño
+    void transferirHechizos(Mago* viejoDuenio, Mago* nuevoDuenio) {
+        if (!viejoDuenio || !nuevoDuenio || viejoDuenio == nuevoDuenio) return;
+        if (viejoDuenio->listaHechizos == nullptr) return; // nada que transferir
+
+        if (nuevoDuenio->listaHechizos == nullptr) {
+            nuevoDuenio->listaHechizos = viejoDuenio->listaHechizos;
+        } else {
+            Hechizo* actual = viejoDuenio->listaHechizos;
+            while (actual->siguiente != nullptr) {
+                actual = actual->siguiente;
+            }
+            actual->siguiente = nuevoDuenio->listaHechizos;
+            nuevoDuenio->listaHechizos = viejoDuenio->listaHechizos;
+        }
+        viejoDuenio->listaHechizos = nullptr;
+    }
