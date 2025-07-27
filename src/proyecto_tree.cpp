@@ -221,3 +221,93 @@ private:
         }
         viejoDuenio->listaHechizos = nullptr;
     }
+
+public:
+    ArbolMagos() : root(nullptr) {}
+
+    // 1. Cargar datos desde CSV para construir árbol binario
+    void cargarDesdeCSV(const string& filename) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "No se pudo abrir el archivo " << filename << endl;
+            return;
+        }
+
+        string line;
+        getline(file, line); // Encabezado
+
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string token;
+            int id, age, id_father;
+            string name, last_name, type_magic;
+            char gender;
+            int is_dead_int, is_owner_int;
+
+            getline(ss, token, ','); id = stoi(token);
+            getline(ss, name, ',');
+            getline(ss, last_name, ',');
+            getline(ss, token, ','); gender = token[0];
+            getline(ss, token, ','); age = stoi(token);
+            getline(ss, token, ','); id_father = stoi(token);
+            getline(ss, token, ','); is_dead_int = stoi(token);
+            getline(ss, type_magic, ',');
+            getline(ss, token, ',');
+            if (!token.empty() && token.back() == '\r') token.pop_back();
+            is_owner_int = token.empty() ? 0 : stoi(token);
+
+            Mago* nuevo = new Mago(id, name, last_name, gender, age, id_father, is_dead_int == 1, type_magic, is_owner_int == 1);
+
+            if (id_father == 0) {
+                root = nuevo;
+            } else {
+                Mago* padre = buscarMago(root, id_father);
+                if (padre) {
+                    insertarDiscipulo(padre, nuevo);
+                } else {
+                    cout << "No se encontro padre con id " << id_father << " para el mago " << id << endl;
+                }
+            }
+        }
+        file.close();
+    }
+
+    // Agrega hechizo al mago (a la cabeza de la lista)
+    void agregarHechizo(Mago* mago, const string& nombreHechizo) {
+        Hechizo* nuevo = new Hechizo(nombreHechizo);
+        nuevo->siguiente = mago->listaHechizos;
+        mago->listaHechizos = nuevo;
+    }
+
+    // Cargar hechizos desde CSV asignándolos a magos
+    void cargarHechizosDesdeCSV(const string& filename) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "No se pudo abrir el archivo de hechizos " << filename << endl;
+            return;
+        }
+
+        string line;
+        getline(file, line); // cabecera
+
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string token;
+            int id_mago;
+            string nombre_hechizo;
+
+            getline(ss, token, ',');
+            id_mago = stoi(token);
+            getline(ss, nombre_hechizo);
+            if (!nombre_hechizo.empty() && nombre_hechizo.back() == '\r')
+                nombre_hechizo.pop_back();
+
+            Mago* mago = buscarMago(root, id_mago);
+            if (mago) {
+                agregarHechizo(mago, nombre_hechizo);
+            } else {
+                cout << "No se encontró mago con id " << id_mago << " para asignar hechizo " << nombre_hechizo << endl;
+            }
+        }
+        file.close();
+    }
