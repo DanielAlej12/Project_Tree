@@ -433,3 +433,75 @@ void asignarNuevoDuenio() {
 
         cout << "No se encontro mago para asignar como nuevo dueno." << endl;
     }
+
+void modificarDatos(int id) {
+        Mago* mago = buscarMago(root, id);
+        if (!mago) {
+            cout << "No se encontro mago con id " << id << endl;
+            return;
+        }
+        cout << "Modificando datos de " << mago->name << " " << mago->last_name << endl;
+
+        cout << "Nuevo nombre: ";
+        string n; cin >> n; mago->name = n;
+
+        cout << "Nuevo apellido: ";
+        cin >> n; mago->last_name = n;
+
+        cout << "Nuevo genero (H/M): ";
+        char c; cin >> c;
+        if (c == 'H' || c == 'M') mago->gender = c;
+
+        cout << "Nueva edad: ";
+        int e; cin >> e; mago->age = e;
+
+        cout << "Esta muerto? (0 = No, 1 = Si): ";
+        int m; cin >> m; mago->is_dead = (m == 1);
+
+        cout << "Nuevo tipo de magia (elemental, unique, mixed, no_magic): ";
+        string t; cin >> t; mago->type_magic = t;
+
+        cout << "Desea agregar un hechizo? (s/n): ";
+        char resp;
+        cin >> resp;
+        while (resp == 's' || resp == 'S') {
+            cout << "Nombre del hechizo: ";
+            string nuevoHechizo;
+            cin.ignore(); // limpiar buffer para getline
+            getline(cin, nuevoHechizo);
+            agregarHechizo(mago, nuevoHechizo);
+            cout << "Agregar otro hechizo? (s/n): ";
+            cin >> resp;
+        }
+
+        cout << "Desea eliminar un hechizo? (s/n): ";
+        cin >> resp;
+        if (resp == 's' || resp == 'S') {
+            cout << "Nombre del hechizo a eliminar: ";
+            string eliminarHechizo;
+            cin.ignore();
+            getline(cin, eliminarHechizo);
+
+            Hechizo* actual = mago->listaHechizos;
+            Hechizo* prev = nullptr;
+            while (actual && actual->nombre != eliminarHechizo) {
+               prev = actual;
+               actual = actual->siguiente;
+            }
+            if (!actual) {
+                cout << "Hechizo no encontrado.\n";
+            } else {
+                if (!prev) {
+                    mago->listaHechizos = actual->siguiente; // Eliminar cabeza
+                } else {
+                    prev->siguiente = actual->siguiente;
+                }
+                delete actual;
+            }
+        }
+
+        cout << "Es dueno del hechizo? (0 = No, 1 = Si): ";
+        int d; cin >> d; mago->is_owner = (d == 1);
+
+        cout << "Datos modificados correctamente.\n";
+    }
